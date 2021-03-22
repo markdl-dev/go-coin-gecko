@@ -20,8 +20,11 @@ type Client struct {
 	// Base URL for API requests
 	BaseURL *url.URL
 
-	// Services used for talking to different parts of the CoinGecko API.
+	// Services used for talking to the Utilities in the CoinGecko API.
 	Util *UtilService
+
+	// Services used for talking to  the Exchange Rates in the CoinGecko API.
+	ExchangeRate *ExchangeRateService
 }
 
 func NewClient(httpClient *http.Client) *Client {
@@ -33,6 +36,7 @@ func NewClient(httpClient *http.Client) *Client {
 
 	c := &Client{client: httpClient, BaseURL: baseURL}
 	c.Util = &UtilService{client: c}
+	c.ExchangeRate = &ExchangeRateService{client: c}
 
 	return c
 }

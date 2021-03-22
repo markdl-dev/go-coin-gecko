@@ -27,6 +27,7 @@ type RatesStruct struct {
 }
 
 // GetExchangeRatesWithContext gets the BTC-to-Currency exchange rates in CoinGecko
+// https://api.coingecko.com/api/v3/exchange_rates
 func (s *ExchangeRateService) GetExchangeRatesWithContext(ctx context.Context) (*ExchangeRates, *http.Response, error) {
 	apiEndpoint := "/exchange_rates"
 	req, err := s.client.NewRequestWithContext(ctx, "GET", apiEndpoint, nil)

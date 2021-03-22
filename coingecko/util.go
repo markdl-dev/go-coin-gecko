@@ -16,6 +16,7 @@ type Ping struct {
 }
 
 // Check CoinGecko API server status
+// https://api.coingecko.com/api/v3/ping
 func (s *UtilService) PingWithContext(ctx context.Context) (*Ping, *http.Response, error) {
 	apiEndpoint := "/ping"
 	req, err := s.client.NewRequestWithContext(ctx, "GET", apiEndpoint, nil)
