@@ -15,7 +15,7 @@ type ExchangeRates struct {
 	Rates Rates
 }
 
-// Rates are the rates in ExchangeRates
+// Rates is the rates result
 type Rates map[string]RatesStruct
 
 // RatesStruct are the rate struct in Rates
