@@ -62,38 +62,117 @@ type ROI struct {
 }
 
 type Coin struct {
-	ID                           string      `json:"id"`
-	Symbol                       string      `json:"symbol"`
-	Name                         string      `json:"name"`
-	AssetPlatformID              string      `json:"asset_platform_id"`
-	BlockTimeInMinutes           int32       `json:"block_time_in_minutes"`
-	HashingAlgorithm             string      `json:"hashing_algorithm"`
-	Categories                   []string    `json:"categories"`
-	Description                  Description `json:"description"`
-	Links                        *Links      `json:"links"`
-	Image                        *Image      `json:"image"`
-	CountryOrigin                string      `json:"country_origin"`
-	GenesisDate                  string      `json:"genesis_date"`
-	ContractAddress              string      `json:"contract_address"`
-	SentimentVotesUpPercentage   float32     `json:"sentiment_votes_up_percentage"`
-	SentimentVotesDownPercentage float32     `json:"sentimate_votes_down_percentage"`
-	MarketCapRank                uint16      `json:"market_cap_rank"`
-	CoinGeckoRank                uint16      `json:"coingecko_rank"`
-	CoinGeckoScore               float32     `json:"coingecko_score"`
-	DeveloperScore               float32     `json:"developer_score"`
-	CommunityScore               float32     `json:"community_score"`
-	LiquidityScore               float32     `json:"liquidity_score"`
-	PublicInterestScore          float32     `json:"public_interest_score"`
-	MarketData                   *MarketData `json:"market_data"`
-	// CommunityData                *CommunityDataItem  `json:"community_data"`
-	// DeveloperData                *DeveloperDataItem  `json:"developer_data"`
-	// PublicInterestStats          *PublicInterestItem `json:"public_interest_stats"`
-	// StatusUpdates                *[]StatusUpdateItem `json:"status_updates"`
-	// LastUpdated                  string              `json:"last_updated"`
-	// Tickers                      *[]TickerItem       `json:"tickers"`
+	ID                           string              `json:"id"`
+	Symbol                       string              `json:"symbol"`
+	Name                         string              `json:"name"`
+	AssetPlatformID              string              `json:"asset_platform_id"`
+	Platforms                    map[string]string   `json:"platforms"`
+	BlockTimeInMinutes           int32               `json:"block_time_in_minutes"`
+	HashingAlgorithm             string              `json:"hashing_algorithm"`
+	Categories                   []string            `json:"categories"`
+	PublicNotice                 string              `json:"public_notice"`
+	AdditonalNotices             []string            `json:"additional_notices"`
+	Localization                 Localization        `json:"localization"`
+	Description                  Description         `json:"description"`
+	Links                        *Links              `json:"links"`
+	Image                        *Image              `json:"image"`
+	CountryOrigin                string              `json:"country_origin"`
+	GenesisDate                  string              `json:"genesis_date"`
+	ContractAddress              string              `json:"contract_address"`
+	SentimentVotesUpPercentage   float32             `json:"sentiment_votes_up_percentage"`
+	SentimentVotesDownPercentage float32             `json:"sentimate_votes_down_percentage"`
+	MarketCapRank                uint16              `json:"market_cap_rank"`
+	CoinGeckoRank                uint16              `json:"coingecko_rank"`
+	CoinGeckoScore               float32             `json:"coingecko_score"`
+	DeveloperScore               float32             `json:"developer_score"`
+	CommunityScore               float32             `json:"community_score"`
+	LiquidityScore               float32             `json:"liquidity_score"`
+	PublicInterestScore          float32             `json:"public_interest_score"`
+	MarketData                   *MarketData         `json:"market_data"`
+	CommunityData                *CommunityData      `json:"community_data"`
+	DeveloperData                *DeveloperData      `json:"developer_data"`
+	PublicInterestStats          *PublicInterestStat `json:"public_interest_stats"`
+	StatusUpdates                *[]StatusUpdate     `json:"status_updates"`
+	LastUpdated                  string              `json:"last_updated"`
+	Tickers                      *[]Ticker           `json:"tickers"`
 }
 
+type Localization map[string]string
+
 type Description map[string]string
+
+type CommunityData struct {
+	FacebookLikes            *uint    `json:"facebook_likes"`
+	TwitterFollowers         *uint    `json:"twitter_followers"`
+	RedditAveragePosts48H    *float64 `json:"reddit_average_posts_48h"`
+	RedditAverageComments48H *float64 `json:"reddit_average_comments_48h"`
+	RedditSubscribers        *uint    `json:"reddit_subscribers"`
+	RedditAccountsActive48H  *uint    `json:"reddit_accounts_active_48h"`
+	TelegramChannelUserCount *uint    `json:"telegram_channel_user_count"`
+}
+
+type DeveloperData struct {
+	Forks                          *uint                 `json:"forks"`
+	Stars                          *uint                 `json:"stars"`
+	Subscribers                    *uint                 `json:"subscribers"`
+	TotalIssues                    *uint                 `json:"total_issues"`
+	ClosedIssues                   *uint                 `json:"closed_issues"`
+	PullRequestsMerged             *uint                 `json:"pull_requests_merged"`
+	PullRequestContributors        *uint                 `json:"pull_request_contributors"`
+	CodeAdditionsDeletions4Weeks   CodeAdditionsDeletion `json:"code_additions_deletions_4_weeks"`
+	CommitsCount4Weeks             *uint                 `json:"commit_count_4_weeks"`
+	Last4WeeksCommitActivitySeries []int                 `json:"last_4_weeks_commit_activity_series"`
+}
+
+type CodeAdditionsDeletion struct {
+	Additions int32 `json:"additions"`
+	Deletions int32 `json:"deletions"`
+}
+
+type PublicInterestStat struct {
+	AlexaRank   uint `json:"alexa_rank"`
+	BingMatches uint `json:"bing_matches"`
+}
+
+type StatusUpdate struct {
+	Description string `json:"description"`
+	Category    string `json:"category"`
+	CreatedAt   string `json:"created_at"`
+	User        string `json:"user"`
+	UserTitle   string `json:"user_title"`
+	Pin         bool   `json:"pin"`
+	Project     struct {
+		Type   string `json:"type"`
+		ID     string `json:"id"`
+		Name   string `json:"name"`
+		Symbol string `json:"ada"`
+		Image  Image  `json:"image"`
+	} `json:"project"`
+}
+
+type Ticker struct {
+	Base   string `json:"base"`
+	Target string `json:"target"`
+	Market struct {
+		Name                string `json:"name"`
+		Identifier          string `json:"identifier"`
+		HasTradingIncentive bool   `json:"has_trading_incentive"`
+	} `json:"market"`
+	Last                   float64            `json:"last"`
+	Volume                 float64            `json:"volume"`
+	ConvertedLast          map[string]float64 `json:"converted_last"`
+	ConvertedVolume        map[string]float64 `json:"converted_volume"`
+	TrustScore             string             `json:"trust_score"`
+	BidAskSpreadPercentage float64            `json:"bid_ask_spread_percentage"`
+	Timestamp              string             `json:"timestamp"`
+	LastTradedAt           string             `json:"last_traded_at"`
+	LastFetchAt            string             `json:"last_fetch_at"`
+	IsAnomaly              bool               `json:"is_anomaly"`
+	IsStale                bool               `json:"is_stale"`
+	TradeURL               string             `json:"trade_url"`
+	CoinID                 string             `json:"coin_id"`
+	TargetCoinID           string             `json:"target_coin_id"`
+}
 
 type Links struct {
 	HomePage                   []string  `json:"homepage"`
@@ -123,32 +202,49 @@ type Image struct {
 type CurrencyPrice map[string]float64
 
 type MarketData struct {
-	CurrentPrice                       CurrencyPrice     `json:"current_price"`
-	ATH                                CurrencyPrice     `json:"ath"`
-	ATHChangePercentage                CurrencyPrice     `json:"ath_change_percentage"`
-	ATHDate                            map[string]string `json:"ath_date"`
-	ATL                                CurrencyPrice     `json:"atl"`
-	ATLChangePercentage                CurrencyPrice     `json:"atl_change_percentage"`
-	ATLDate                            map[string]string `json:"atl_date"`
-	MarketCap                          CurrencyPrice     `json:"market_cap"`
-	MarketCapRank                      int16             `json:"market_cap_rank"`
-	TotalVolume                        CurrencyPrice     `json:"total_volume"`
-	High24H                            CurrencyPrice     `json:"high_24h"`
-	Low24H                             CurrencyPrice     `json:"low_24h"`
-	PriceChange24H                     float64           `json:"price_change_24h"`
-	PriceChangePercentage24H           float64           `json:"price_change_percentage_24h"`
-	PriceChangePercentage7D            float64           `json:"price_change_percentage_7d"`
-	PriceChangePercentage14D           float64           `json:"price_change_percentage_14d"`
-	PriceChangePercentage30D           float64           `json:"price_change_percentage_30d"`
-	PriceChangePercentage60D           float64           `json:"price_change_percentage_60d"`
-	PriceChangePercentage200D          float64           `json:"price_change_percentage_200d"`
-	PriceChangePercentage1Y            float64           `json:"price_change_percentage_1y"`
-	MarketCapChange24H                 float64           `json:"market_cap_change_24h"`
-	MarketCapChangePercentage24H       float64           `json:"market_cap_change_percentage_24h"`
-	PriceChangePercentage24HInCurrency CurrencyPrice     `json:"price_change_percentage_24h_in_currency"`
-	TotalSupply                        *float64          `json:"total_supply"`
-	CirculatingSupply                  float64           `json:"circulating_supply"`
-	LastUpdated                        string            `json:"last_updated"`
+	CurrentPrice                           CurrencyPrice     `json:"current_price"`
+	ROI                                    *ROI              `json:"roi"`
+	ATH                                    CurrencyPrice     `json:"ath"`
+	ATHChangePercentage                    CurrencyPrice     `json:"ath_change_percentage"`
+	ATHDate                                map[string]string `json:"ath_date"`
+	ATL                                    CurrencyPrice     `json:"atl"`
+	ATLChangePercentage                    CurrencyPrice     `json:"atl_change_percentage"`
+	ATLDate                                map[string]string `json:"atl_date"`
+	MarketCap                              CurrencyPrice     `json:"market_cap"`
+	MarketCapRank                          int16             `json:"market_cap_rank"`
+	FullyDilutedValuation                  CurrencyPrice     `json:"fully_diluted_valuation"`
+	TotalVolume                            CurrencyPrice     `json:"total_volume"`
+	High24H                                CurrencyPrice     `json:"high_24h"`
+	Low24H                                 CurrencyPrice     `json:"low_24h"`
+	PriceChange24H                         float64           `json:"price_change_24h"`
+	PriceChangePercentage24H               float64           `json:"price_change_percentage_24h"`
+	PriceChangePercentage7D                float64           `json:"price_change_percentage_7d"`
+	PriceChangePercentage14D               float64           `json:"price_change_percentage_14d"`
+	PriceChangePercentage30D               float64           `json:"price_change_percentage_30d"`
+	PriceChangePercentage60D               float64           `json:"price_change_percentage_60d"`
+	PriceChangePercentage200D              float64           `json:"price_change_percentage_200d"`
+	PriceChangePercentage1Y                float64           `json:"price_change_percentage_1y"`
+	MarketCapChange24H                     float64           `json:"market_cap_change_24h"`
+	MarketCapChangePercentage24H           float64           `json:"market_cap_change_percentage_24h"`
+	PriceChange24HInCurrency               CurrencyPrice     `json:"price_change_24h_in_currency"`
+	PriceChangePercentage1HInCurrency      CurrencyPrice     `json:"price_change_percentage_1h_in_currency"`
+	PriceChangePercentage24HInCurrency     CurrencyPrice     `json:"price_change_percentage_24h_in_currency"`
+	PriceChangePercentage7DInCurrency      CurrencyPrice     `json:"price_change_percentage_7d_in_currency"`
+	PriceChangePercentage14DInCurrency     CurrencyPrice     `json:"price_change_percentage_14d_in_currency"`
+	PriceChangePercentage30DInCurrency     CurrencyPrice     `json:"price_change_percentage_30d_in_currency"`
+	PriceChangePercentage60DInCurrency     CurrencyPrice     `json:"price_change_percentage_60d_in_currency"`
+	PriceChangePercentage200DInCurrency    CurrencyPrice     `json:"price_change_percentage_200d_in_currency"`
+	PriceChangePercentage1YInCurrency      CurrencyPrice     `json:"price_change_percentage_1y_in_currency"`
+	MarketCapChange24HInCurrency           CurrencyPrice     `json:"market_cap_change_24h_in_currency"`
+	MarketCapChangePercentage24HInCurrency CurrencyPrice     `json:"market_cap_change_percentage_24h_in_currency"`
+	TotalSupply                            *float64          `json:"total_supply"`
+	CirculatingSupply                      float64           `json:"circulating_supply"`
+	Sparkline                              *Sparkline        `json:"sparkline_7d"`
+	LastUpdated                            string            `json:"last_updated"`
+}
+
+type Sparkline struct {
+	Price []float64 `json:"price"`
 }
 
 // GetMarkets gets List all supported coins price, market cap, volume, and market related data
