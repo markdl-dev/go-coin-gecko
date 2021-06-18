@@ -5,7 +5,10 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 // CoinsService handles Coin endpoints for CoinGecko API
@@ -247,9 +250,66 @@ type Sparkline struct {
 	Price []float64 `json:"price"`
 }
 
+type CoinsQueryOptions struct {
+	Category              string   `url:"category,omitempty"`
+	CoinIDs               []string `url:"ids,omitempty"`
+	Localization          string   `url:"localization,omitempty"`
+	Tickers               bool     `url:"tickers,omitempty"`
+	MarketData            bool     `url:"market_data,omitempty"`
+	CommunityData         bool     `url:"community_data,omitempty"`
+	DeveloperData         bool     `url:"developer_data,omitempty"`
+	Sparkline             bool     `url:"sparkline,omitempty"`
+	Order                 string   `url:"order,omitempty"`
+	PerPage               uint16   `url:"per_page,omitempty"`
+	Page                  uint16   `url:"page,omitempty"`
+	PriceChangePercentage string   `url:"price_change_percentage,omitempty"`
+}
+
+type CoinsQueryOrder struct {
+	GeckoAsc      string
+	GeckoDesc     string
+	IDAsc         string
+	IDDesc        string
+	MarketCapAsc  string
+	MarketCapDesc string
+	VolumeAsc     string
+	VolumeDesc    string
+}
+
+var CoinsQueryOrderValues = &CoinsQueryOrder{
+	GeckoAsc:      "gecko_asc",
+	GeckoDesc:     "gecko_desc",
+	IDAsc:         "id_asc",
+	IDDesc:        "id_desc",
+	MarketCapAsc:  "market_cap_asc",
+	MarketCapDesc: "market_cap_desc",
+	VolumeAsc:     "volume_asc",
+	VolumeDesc:    "volume_desc",
+}
+
+type CoinsPriceChangePercentage struct {
+	PriceChangePercentage1H   string
+	PriceChangePercentage24H  string
+	PriceChangePercentage7D   string
+	PriceChangePercentage14D  string
+	PriceChangePercentage30D  string
+	PriceChangePercentage200D string
+	PriceChangePercentage1Y   string
+}
+
+var CoinsPriceChangePercentageValues = &CoinsPriceChangePercentage{
+	PriceChangePercentage1H:   "1h",
+	PriceChangePercentage24H:  "24h",
+	PriceChangePercentage7D:   "7d",
+	PriceChangePercentage14D:  "14d",
+	PriceChangePercentage30D:  "30d",
+	PriceChangePercentage200D: "200d",
+	PriceChangePercentage1Y:   "1y",
+}
+
 // GetMarkets gets List all supported coins price, market cap, volume, and market related data
 // https://api.coingecko.com/api/v3/coins/markets
-func (s *CoinsService) GetMarketsWithContext(ctx context.Context, vsCurrency string, coinIDSlice []string) (*CoinsMarketData, *http.Response, error) {
+func (s *CoinsService) GetMarketsWithContext(ctx context.Context, vsCurrency string, options *CoinsQueryOptions) (*CoinsMarketData, *http.Response, error) {
 	if len(vsCurrency) == 0 {
 		return nil, nil, errors.New("target currency is required")
 	}
@@ -261,17 +321,50 @@ func (s *CoinsService) GetMarketsWithContext(ctx context.Context, vsCurrency str
 	urlValues := url.Values{}
 	urlValues.Add("vs_currency", vsCurrency)
 
-	if len(coinIDSlice) > 0 {
-		coinIDStr := strings.Join(coinIDSlice, ",")
-		urlValues.Add("ids", coinIDStr)
+	coinIDStr := ""
+	order := CoinsQueryOrderValues.MarketCapDesc
+	perPage := "250"
+	page := "1"
+	sparkLine := false
+	priceChangePercentage := []string{
+		CoinsPriceChangePercentageValues.PriceChangePercentage1H,
+		CoinsPriceChangePercentageValues.PriceChangePercentage24H,
+		CoinsPriceChangePercentageValues.PriceChangePercentage7D,
+		CoinsPriceChangePercentageValues.PriceChangePercentage14D,
+		CoinsPriceChangePercentageValues.PriceChangePercentage30D,
+	}
+	priceChangePercentageString := strings.Join(priceChangePercentage, ",")
+
+	if options != nil {
+		if len(options.CoinIDs) > 0 {
+			coinIDStr = strings.Join(options.CoinIDs, ",")
+		}
+
+		if len(options.Order) > 0 {
+			order = options.Order
+		}
+
+		if options.PerPage > 0 {
+			perPage = strconv.Itoa(int(options.PerPage))
+		}
+
+		if options.Page > 0 {
+			page = strconv.Itoa(int(options.Page))
+		}
+
+		sparkLine = options.Sparkline
+
+		if len(options.PriceChangePercentage) > 0 {
+			priceChangePercentageString = options.PriceChangePercentage
+		}
 	}
 
-	// TODO convert this to param
-	urlValues.Add("order", "market_cap_desc")
-	urlValues.Add("per_page", "100")
-	urlValues.Add("page", "1")
-	urlValues.Add("sparkline", "false")
-	urlValues.Add("price_change_percentage", "1h,24h,7d,14d,30d")
+	urlValues.Add("ids", coinIDStr)
+	urlValues.Add("order", order)
+	urlValues.Add("per_page", perPage)
+	urlValues.Add("page", page)
+	urlValues.Add("sparkline", strconv.FormatBool(sparkLine))
+	urlValues.Add("price_change_percentage", priceChangePercentageString)
 
 	u.RawQuery = urlValues.Encode()
 
@@ -289,13 +382,13 @@ func (s *CoinsService) GetMarketsWithContext(ctx context.Context, vsCurrency str
 }
 
 // GetExchangeRates wraps GetMarketsWithContext using the background context
-func (s *CoinsService) GetMarkets(currency string, coinIDSlice []string) (*CoinsMarketData, *http.Response, error) {
-	return s.GetMarketsWithContext(context.Background(), currency, coinIDSlice)
+func (s *CoinsService) GetMarkets(currency string, options *CoinsQueryOptions) (*CoinsMarketData, *http.Response, error) {
+	return s.GetMarketsWithContext(context.Background(), currency, options)
 }
 
 // Get current data (name, price, market, … including exchange tickers) for a coin.
 // https://api.coingecko.com/api/v3/coins/{id}
-func (s *CoinsService) GetCoinWithContext(ctx context.Context, coinID string) (*Coin, *http.Response, error) {
+func (s *CoinsService) GetCoinWithContext(ctx context.Context, coinID string, options *CoinsQueryOptions) (*Coin, *http.Response, error) {
 	if len(coinID) == 0 {
 		return nil, nil, errors.New("target coin id is required")
 	}
@@ -304,14 +397,17 @@ func (s *CoinsService) GetCoinWithContext(ctx context.Context, coinID string) (*
 		Path: "/coins/" + coinID,
 	}
 
-	// urlValues := url.Values{}
-	// urlValues.Add("currency", vsCurrencyStr)
-
-	// u.RawQuery = urlValues.Encode()
-
 	req, err := s.client.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if options != nil {
+		q, err := query.Values(options)
+		if err != nil {
+			return nil, nil, err
+		}
+		req.URL.RawQuery = q.Encode()
 	}
 
 	coinInfo := new(Coin)
@@ -323,6 +419,6 @@ func (s *CoinsService) GetCoinWithContext(ctx context.Context, coinID string) (*
 }
 
 // GetCoin wraps GetCoinWithContext using the background context
-func (s *CoinsService) GetCoin(ID string) (*Coin, *http.Response, error) {
-	return s.GetCoinWithContext(context.Background(), ID)
+func (s *CoinsService) GetCoin(ID string, options *CoinsQueryOptions) (*Coin, *http.Response, error) {
+	return s.GetCoinWithContext(context.Background(), ID, options)
 }
